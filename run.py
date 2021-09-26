@@ -153,7 +153,7 @@ def run(opts):
         opts.epoch_start = epoch_resume + 1
 
     if opts.eval_only:
-        validate(model, val_dataset, opts)
+        validate(model, val_dataset, opts, all_metric=True)
     else:
         for epoch in range(opts.epoch_start, opts.epoch_start + opts.n_epochs):
             train_epoch(

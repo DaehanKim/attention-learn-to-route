@@ -101,7 +101,7 @@ class AttentionModel(nn.Module):
             self.W_placeholder = nn.Parameter(torch.Tensor(2 * embedding_dim))
             self.W_placeholder.data.uniform_(-1, 1)  # Placeholder should be in range of activations
 
-        self.init_embed = nn.Linear(node_dim, embedding_dim)
+        # self.init_embed = nn.Linear(node_dim, embedding_dim)
 
         self.embedder = GraphAttentionEncoderWithSet(
             n_heads=n_heads,
@@ -132,9 +132,9 @@ class AttentionModel(nn.Module):
         """
 
         if self.checkpoint_encoder and self.training:  # Only checkpoint if we need gradients
-            embeddings, _ = checkpoint(self.embedder, self._init_embed(input))
+            embeddings, _ = checkpoint(self.embedder, input)
         else:
-            embeddings, _ = self.embedder(self._init_embed(input))
+            embeddings, _ = self.embedder(input)
 
         _log_p, pi = self._inner(input, embeddings)
 
@@ -151,7 +151,7 @@ class AttentionModel(nn.Module):
         return self.problem.beam_search(*args, **kwargs, model=self)
 
     def precompute_fixed(self, input):
-        embeddings, _ = self.embedder(self._init_embed(input))
+        embeddings, _ = self.embedder(input)
         # Use a CachedLookup such that if we repeatedly index this object with the same index we only need to do
         # the lookup once... this is the case if all elements in the batch have maximum batch size
         return CachedLookup(self._precompute(embeddings))

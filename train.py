@@ -16,16 +16,37 @@ def get_inner_model(model):
     return model.module if isinstance(model, DataParallel) else model
 
 
-def validate(model, dataset, opts):
+def validate(model, dataset, opts, all_metric=False):
     # Validate
     print('Validating...')
-    cost = rollout(model, dataset, opts)
+    if all_metric:
+        rmse, std, cost = torch.chunk(rollout_all_metric(model, dataset, opts),3,2)
+        avg_rmse, avg_std, avg_cost = rmse.mean(), std.mean(), cost.mean()
+        print(f"Validation rmse {avg_rmse} +- {rmse.std()} / std {avg_std} += {std.std()} / fitness {-avg_cost} +- {cost.std()}")
+        return avg_rmse, avg_std, avg_cost
+    else:
+        cost = rollout(model, dataset, opts)
     avg_cost = cost.mean()
     print('Validation overall avg_cost: {} +- {}'.format(
         avg_cost, torch.std(cost) / math.sqrt(len(cost))))
 
     return avg_cost
 
+def rollout_all_metric(model, dataset, opts):
+    # Put in greedy evaluation mode!
+    set_decode_type(model, "greedy")
+    model.eval()
+
+    def eval_model_bat(bat):
+        with torch.no_grad():
+            rmse, std, cost, _ = model(move_to(bat, opts.device))
+        return [rmse.data.cpu(), std.data.cpu(), cost.data.cpu()]
+
+    return torch.stack([
+        torch.cat(eval_model_bat(bat), dim=1)
+        for bat
+        in tqdm(DataLoader(dataset, batch_size=opts.eval_batch_size), disable=opts.no_progress_bar)
+    ], 0)
 
 def rollout(model, dataset, opts):
     # Put in greedy evaluation mode!

@@ -12,7 +12,7 @@ class DG(object):
     NAME = 'dg'
 
     @staticmethod
-    def get_costs(dataset, pi, lamb=0.06):
+    def get_costs(dataset, pi, lamb=0.3547):
         # Check that tours are valid, i.e. contain 0 to n -1
         
 

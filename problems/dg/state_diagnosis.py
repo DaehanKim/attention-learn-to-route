@@ -49,7 +49,7 @@ class StateDG(NamedTuple):
         )
 
     @staticmethod
-    def initialize(loc, diag_size=10, visited_dtype=torch.uint8, lamb = torch.tensor([0.06])):
+    def initialize(loc, diag_size=10, visited_dtype=torch.uint8, lamb = torch.tensor([0.3547])):
 
         batch_size, n_loc, _ = loc.size()
         prev_a = torch.zeros(batch_size, 1, dtype=torch.long, device=loc.device)
