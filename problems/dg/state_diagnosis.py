@@ -83,7 +83,7 @@ class StateDG(NamedTuple):
 
         assert self.all_finished()
 
-        return self.fitness
+        return -self.fitness
 
     def update(self, selected):
 

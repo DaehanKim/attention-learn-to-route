@@ -26,7 +26,7 @@ def generate_dg_train_data(dataset_size, question_num, student_num, seed=None):
 
 def generate_random_matrix_data(dataset_size, question_num, student_num, seed=None):
     seed = random.randint(0,10000) if seed is None else seed 
-    return np.random.uniform(0,1,(dataset_size, question_num, student_num)).tolist()
+    return np.random.uniform(0.4,1,(dataset_size, question_num, student_num)).tolist()
 
 def generate_tsp_data(dataset_size, tsp_size):
     return np.random.uniform(size=(dataset_size, tsp_size, 2)).tolist()
