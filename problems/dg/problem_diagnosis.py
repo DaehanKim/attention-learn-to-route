@@ -4,7 +4,7 @@ import os
 import pickle
 from problems.dg.state_diagnosis import StateDG
 from utils.beam_search import beam_search
-from .generate_data import generate_dg_train_data
+from .generate_data import generate_random_matrix_data, generate_dg_train_data
 
 class DG(object):
     # shortcut for Diagnosis Generation
@@ -69,7 +69,7 @@ class DGDataset(Dataset):
                 self.data = [torch.FloatTensor(row) for row in (data[offset:offset+num_samples])]
         else:
             # raise (NotImplementedError, "Generating data on-the-fly is not allowed in DG task.")
-            self.data = [torch.FloatTensor(item) for item in generate_dg_train_data(num_samples, 50, 100, seed = None)]
+            self.data = [torch.FloatTensor(item) for item in generate_random_matrix_data(num_samples, 50, 100, seed = None)]
 
         self.size = len(self.data)
 

@@ -229,7 +229,7 @@ class GraphAttentionEncoderWithSet(nn.Module):
 
         # To map input to embedding space
         self.num_embed = nn.Sequential(nn.Linear(1, embed_dim), 
-                                       nn.ReLU())
+                                       nn.GELU())
         self.init_embed = nn.Linear(embed_dim, embed_dim)
 
         self.layers = nn.Sequential(*(

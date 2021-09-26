@@ -13,8 +13,8 @@ def get_options(args=None):
     parser.add_argument('--student_num', type=int, default=100, help="number of default student in datasets")
 
     parser.add_argument('--question_num', type=int, default=50, help="The size of the problem graph")
-    parser.add_argument('--batch_size', type=int, default=512, help='Number of instances per batch during training')
-    parser.add_argument('--epoch_size', type=int, default=5120, help='Number of instances per epoch during training')
+    parser.add_argument('--batch_size', type=int, default=256, help='Number of instances per batch during training')
+    parser.add_argument('--epoch_size', type=int, default=12800, help='Number of instances per epoch during training')
     parser.add_argument('--val_size', type=int, default=2000,
                         help='Number of instances used for reporting validation performance')
     parser.add_argument('--val_dataset', type=str, default="data/dg/dg_q50_seed1234_dg_valid.pkl", help='Dataset file to use for validation')
