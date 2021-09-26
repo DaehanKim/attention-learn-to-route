@@ -213,3 +213,43 @@ class GraphAttentionEncoder(nn.Module):
             h,  # (batch_size, graph_size, embed_dim)
             h.mean(dim=1),  # average to get embedding of graph, (batch_size, embed_dim)
         )
+
+
+class GraphAttentionEncoderWithSet(nn.Module):
+    def __init__(
+            self,
+            n_heads,
+            embed_dim,
+            n_layers,
+            node_dim=None,
+            normalization='batch',
+            feed_forward_hidden=512
+    ):
+        super(GraphAttentionEncoderWithSet, self).__init__()
+
+        # To map input to embedding space
+        self.num_embed = nn.Sequential(nn.Linear(1, embed_dim), 
+                                       nn.ReLU())
+        self.init_embed = nn.Linear(embed_dim, embed_dim)
+
+        self.layers = nn.Sequential(*(
+            MultiHeadAttentionLayer(n_heads, embed_dim, feed_forward_hidden, normalization)
+            for _ in range(n_layers)
+        ))
+
+    def forward(self, x, mask=None):
+
+        assert mask is None, "TODO mask not yet supported!"
+        # Batch multiply to get initial embeddings of nodes
+        x = x.unsqueeze(-1)
+        assert x.dim() == 4, "Needs to be unsqueezed!"
+        assert x.size(-1) == 1, "Last dim size should be 1!"
+        h = self.num_embed(x)
+        h = self.init_embed(x.view(-1, x.size(-1))).view(*x.size()[:2], -1) if self.init_embed is not None else x
+
+        h = self.layers(h)
+
+        return (
+            h,  # (batch_size, graph_size, embed_dim)
+            h.mean(dim=1),  # average to get embedding of graph, (batch_size, embed_dim)
+        )

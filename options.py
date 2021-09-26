@@ -9,13 +9,15 @@ def get_options(args=None):
         description="Attention based model for solving the Travelling Salesman Problem with Reinforcement Learning")
 
     # Data
-    parser.add_argument('--problem', default='tsp', help="The problem to solve, default 'tsp'")
-    parser.add_argument('--graph_size', type=int, default=20, help="The size of the problem graph")
+    parser.add_argument('--problem', default='dg', help="The problem to solve, default 'dg'")
+    parser.add_argument('--student_num', type=int, default=100, help="number of default student in datasets")
+
+    parser.add_argument('--question_num', type=int, default=50, help="The size of the problem graph")
     parser.add_argument('--batch_size', type=int, default=512, help='Number of instances per batch during training')
-    parser.add_argument('--epoch_size', type=int, default=1280000, help='Number of instances per epoch during training')
-    parser.add_argument('--val_size', type=int, default=10000,
+    parser.add_argument('--epoch_size', type=int, default=5120, help='Number of instances per epoch during training')
+    parser.add_argument('--val_size', type=int, default=2000,
                         help='Number of instances used for reporting validation performance')
-    parser.add_argument('--val_dataset', type=str, default=None, help='Dataset file to use for validation')
+    parser.add_argument('--val_dataset', type=str, default="data/dg/dg_q50_seed1234_dg_valid.pkl", help='Dataset file to use for validation')
 
     # Model
     parser.add_argument('--model', default='attention', help="Model, 'attention' (default) or 'pointer'")
@@ -77,7 +79,7 @@ def get_options(args=None):
     opts.run_name = "{}_{}".format(opts.run_name, time.strftime("%Y%m%dT%H%M%S"))
     opts.save_dir = os.path.join(
         opts.output_dir,
-        "{}_{}".format(opts.problem, opts.graph_size),
+        "{}_{}".format(opts.problem, opts.question_num),
         opts.run_name
     )
     if opts.bl_warmup_epochs is None:

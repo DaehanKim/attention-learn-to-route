@@ -42,6 +42,7 @@ class AttentionModelFixed(NamedTuple):
 class AttentionModel(nn.Module):
 
     def __init__(self,
+                 student_num,
                  embedding_dim,
                  hidden_dim,
                  problem,
@@ -55,6 +56,7 @@ class AttentionModel(nn.Module):
                  shrink_size=None):
         super(AttentionModel, self).__init__()
 
+        self.student_num = student_num
         self.embedding_dim = embedding_dim
         self.hidden_dim = hidden_dim
         self.n_encode_layers = n_encode_layers
@@ -91,9 +93,9 @@ class AttentionModel(nn.Module):
             if self.is_vrp and self.allow_partial:  # Need to include the demand if split delivery allowed
                 self.project_node_step = nn.Linear(1, 3 * embedding_dim, bias=False)
         else:  # TSP
-            assert problem.NAME == "tsp", "Unsupported problem: {}".format(problem.NAME)
+            assert problem.NAME == "dg", "Unsupported problem: {}".format(problem.NAME)
             step_context_dim = 2 * embedding_dim  # Embedding of first and last node
-            node_dim = 2  # x, y
+            node_dim = student_num  # scores for all students
             
             # Learned input symbols for first action
             self.W_placeholder = nn.Parameter(torch.Tensor(2 * embedding_dim))
@@ -136,7 +138,7 @@ class AttentionModel(nn.Module):
 
         _log_p, pi = self._inner(input, embeddings)
 
-        cost, mask = self.problem.get_costs(input, pi)
+        _ ,_, cost, mask = self.problem.get_costs(input, pi)
         # Log likelyhood is calculated within the model since returning it per action does not work well with
         # DataParallel since sequences can be of different lengths
         ll = self._calc_log_likelihood(_log_p, pi, mask)

@@ -2,9 +2,9 @@ from torch.utils.data import Dataset
 import torch
 import os
 import pickle
-from problems.tsp.state_tsp import StateDG
+from problems.dg.state_diagnosis import StateDG
 from utils.beam_search import beam_search
-
+from .generate_data import generate_dg_train_data
 
 class DG(object):
     # shortcut for Diagnosis Generation
@@ -12,18 +12,20 @@ class DG(object):
     NAME = 'dg'
 
     @staticmethod
-    def get_costs(dataset, pi):
+    def get_costs(dataset, pi, lamb=0.06):
         # Check that tours are valid, i.e. contain 0 to n -1
-        assert (
-            torch.arange(pi.size(1), out=pi.data.new()).view(1, -1).expand_as(pi) ==
-            pi.data.sort(1)[0]
-        ).all(), "Invalid tour"
+        
 
         # Gather dataset in order of tour
-        d = dataset.gather(1, pi.unsqueeze(-1).expand_as(dataset))
-
-        # Length is distance (L2-norm of difference) from each next location from its prev and of last from first
-        return (d[:, 1:] - d[:, :-1]).norm(p=2, dim=2).sum(1) + (d[:, 0] - d[:, -1]).norm(p=2, dim=1), None
+        collected_snapshot = []
+        for idx, b_idx in enumerate(pi):
+            collected_snapshot.append(dataset[idx][b_idx])
+        collected_snapshot = torch.stack(collected_snapshot, dim=0) # (batch_dim, n_step, n_student)
+        
+        rmse =  ((dataset.mean(1) - collected_snapshot.mean(dim=1)).pow(2)).mean(1, keepdim=True).pow(0.5)  # (batch_dim, 1)
+        std =   collected_snapshot.mean(1).std(1, keepdim=True) # (batch_dim, 1)
+        fitness = -rmse + std * lamb
+        return rmse, std, -fitness, None
 
     @staticmethod
     def make_dataset(*args, **kwargs):
@@ -55,7 +57,7 @@ class DG(object):
 
 class DGDataset(Dataset):
     
-    def __init__(self, filename=None, size=50, num_samples=1000000, offset=0, distribution=None):
+    def __init__(self, filename=None, size=50, num_samples=2000, offset=0):
         super(DGDataset, self).__init__()
 
         self.data_set = []
@@ -66,8 +68,9 @@ class DGDataset(Dataset):
                 data = pickle.load(f)
                 self.data = [torch.FloatTensor(row) for row in (data[offset:offset+num_samples])]
         else:
-            # Sample points randomly in [0, 1] square
-            raise (NotImplementedError, "Generating data on-the-fly is not allowed in DG task.")
+            # raise (NotImplementedError, "Generating data on-the-fly is not allowed in DG task.")
+            self.data = [torch.FloatTensor(item) for item in generate_dg_train_data(num_samples, 50, 100, seed = None)]
+
         self.size = len(self.data)
 
     def __len__(self):
