@@ -245,7 +245,8 @@ class GraphAttentionEncoderWithSet(nn.Module):
         assert x.dim() == 4, "Needs to be unsqueezed!"
         assert x.size(-1) == 1, "Last dim size should be 1!"
         h = self.num_embed(x)
-        h = self.init_embed(x.view(-1, x.size(-1))).view(*x.size()[:2], -1) if self.init_embed is not None else x
+        h = h.mean(2)
+        h = self.init_embed(h.view(-1, h.size(-1))).view(*h.size()[:2], -1) if self.init_embed is not None else h
 
         h = self.layers(h)
 
