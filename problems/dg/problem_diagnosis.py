@@ -4,7 +4,7 @@ import os
 import pickle
 from problems.dg.state_diagnosis import StateDG
 from utils.beam_search import beam_search
-from .generate_data import generate_random_matrix_data, generate_dg_train_data
+from .generate_data import generate_random_matrix_data
 
 class DG(object):
     # shortcut for Diagnosis Generation

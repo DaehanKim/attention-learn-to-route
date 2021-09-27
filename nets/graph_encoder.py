@@ -221,7 +221,8 @@ class GraphAttentionEncoderWithSet(nn.Module):
             n_heads,
             embed_dim,
             n_layers,
-            node_dim=None,
+            student_num=3000,
+            max_question=2000,
             normalization='batch',
             feed_forward_hidden=512
     ):
@@ -231,7 +232,8 @@ class GraphAttentionEncoderWithSet(nn.Module):
         self.num_embed = nn.Sequential(nn.Linear(1, embed_dim), 
                                        nn.ELU())
         self.init_embed = nn.Linear(embed_dim, embed_dim)
-
+        self.student_num = student_num
+        self.max_question = max_question
         self.layers = nn.Sequential(*(
             MultiHeadAttentionLayer(n_heads, embed_dim, feed_forward_hidden, normalization)
             for _ in range(n_layers)
@@ -244,6 +246,10 @@ class GraphAttentionEncoderWithSet(nn.Module):
         x = x.unsqueeze(-1)
         assert x.dim() == 4, "Needs to be unsqueezed!"
         assert x.size(-1) == 1, "Last dim size should be 1!"
+        if x.size(-2) > self.student_num: 
+            x = x[:,:,:self.student_num,:]
+        if x.size(1) > self.max_question:
+            x = x[:, :self.max_question, :, :]
         h = self.num_embed(x)
         h = h.mean(2)
         h = self.init_embed(h.view(-1, h.size(-1))).view(*h.size()[:2], -1) if self.init_embed is not None else h

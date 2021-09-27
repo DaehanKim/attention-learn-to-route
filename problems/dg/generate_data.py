@@ -2,31 +2,31 @@ import argparse
 import os
 import numpy as np
 from utils.data_utils import check_extension, save_dataset
-from dg_data import Simulated_k
+# from dg_data import Simulated_k
 from tqdm import tqdm
 import random
 
 
-def generate_dg_data(dataset_size, question_num, student_num, seed=1234):
-    train, val, test = [], [], []
-    for idx in tqdm(range(dataset_size), total=dataset_size, desc="Generating Snapshots"):
-        _tr, _val, _te = Simulated_k(n=student_num*3, q=question_num, seed=seed+idx).get_data()
-        train.append(_tr.T.tolist())
-        val.append(_val.T.tolist())
-        test.append(_te.T.tolist())
-    return train, val, test
+# def generate_dg_data(dataset_size, question_num, student_num, seed=1234):
+#     train, val, test = [], [], []
+#     for idx in tqdm(range(dataset_size), total=dataset_size, desc="Generating Snapshots"):
+#         _tr, _val, _te = Simulated_k(n=student_num*3, q=question_num, seed=seed+idx).get_data()
+#         train.append(_tr.T.tolist())
+#         val.append(_val.T.tolist())
+#         test.append(_te.T.tolist())
+#     return train, val, test
 
-def generate_dg_train_data(dataset_size, question_num, student_num, seed=None):
-    seed = random.randint(1235,10000) if seed is None else seed
-    data = []
-    for idx in tqdm(range(dataset_size), total=dataset_size, desc="Generating Snapshots"):
-        _tr = Simulated_k(n=student_num, q=question_num, seed=seed+idx).snapshot.T
-        data.append(_tr.tolist())
-    return data
+# def generate_dg_train_data(dataset_size, question_num, student_num, seed=None):
+#     seed = random.randint(1235,10000) if seed is None else seed
+#     data = []
+#     for idx in tqdm(range(dataset_size), total=dataset_size, desc="Generating Snapshots"):
+#         _tr = Simulated_k(n=student_num, q=question_num, seed=seed+idx).snapshot.T
+#         data.append(_tr.tolist())
+#     return data
 
 def generate_random_matrix_data(dataset_size, question_num, student_num, seed=None):
     seed = random.randint(0,10000) if seed is None else seed 
-    return np.random.uniform(0.4,1,(dataset_size, question_num, student_num)).tolist()
+    return np.random.uniform(0,1,(dataset_size, question_num, student_num)).tolist()
 
 def generate_tsp_data(dataset_size, tsp_size):
     return np.random.uniform(size=(dataset_size, tsp_size, 2)).tolist()

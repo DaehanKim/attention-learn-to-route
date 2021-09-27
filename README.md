@@ -1,12 +1,5 @@
-# Attention, Learn to Solve Routing Problems!
-
-Attention based model for learning to solve the Travelling Salesman Problem (TSP) and the Vehicle Routing Problem (VRP), Orienteering Problem (OP) and (Stochastic) Prize Collecting TSP (PCTSP). Training with REINFORCE with greedy rollout baseline.
-
-![TSP100](images/tsp.gif)
-
-## Paper
-For more details, please see our paper [Attention, Learn to Solve Routing Problems!](https://openreview.net/forum?id=ByxBFsRqYm) which has been accepted at [ICLR 2019](https://iclr.cc/Conferences/2019). If this code is useful for your work, please cite our paper:
-
+## Credit
+ [Attention, Learn to Solve Routing Problems!](https://openreview.net/forum?id=ByxBFsRqYm) which has been accepted at [ICLR 2019](https://iclr.cc/Conferences/2019). 
 ```
 @inproceedings{
     kool2018attention,
@@ -30,9 +23,8 @@ For more details, please see our paper [Attention, Learn to Solve Routing Proble
 
 ## Quick start
 
-For training TSP instances with 20 nodes and using rollout as REINFORCE baseline:
 ```bash
-python run.py --graph_size 20 --baseline rollout --run_name 'tsp20_rollout'
+python run.py --run_name dg --val_dataset <validation_data_path> --student_num 2000 --question_num 50 --problem dg --lr_model 1e-5 --lr_critic 1e-5 --n_encode_layers 3
 ```
 
 ## Usage
@@ -44,21 +36,6 @@ Training data is generated on the fly. To generate validation and test data (sam
 python generate_data.py --problem all --name validation --seed 4321
 python generate_data.py --problem all --name test --seed 1234
 ```
-
-### Training
-
-For training TSP instances with 20 nodes and using rollout as REINFORCE baseline and using the generated validation set:
-```bash
-python run.py --graph_size 20 --baseline rollout --run_name 'tsp20_rollout' --val_dataset data/tsp/tsp20_validation_seed4321.pkl
-```
-
-#### Multiple GPUs
-By default, training will happen *on all available GPUs*. To disable CUDA at all, add the flag `--no_cuda`. 
-Set the environment variable `CUDA_VISIBLE_DEVICES` to only use specific GPUs:
-```bash
-CUDA_VISIBLE_DEVICES=2,3 python run.py 
-```
-Note that using multiple GPUs has limited efficiency for small problem sizes (up to 50 nodes).
 
 #### Warm start
 You can initialize a run using a pretrained model by using the `--load_path` option:
@@ -86,30 +63,3 @@ To report the best of 1280 sampled solutions, use
 python eval.py data/tsp/tsp20_test_seed1234.pkl --model pretrained/tsp_20 --decode_strategy sample --width 1280 --eval_batch_size 1
 ```
 Beam Search (not in the paper) is also recently added and can be used using `--decode_strategy bs --width {beam_size}`.
-
-#### To run baselines
-Baselines for different problems are within the corresponding folders and can be ran (on multiple datasets at once) as follows
-```bash
-python -m problems.tsp.tsp_baseline farthest_insertion data/tsp/tsp20_test_seed1234.pkl data/tsp/tsp50_test_seed1234.pkl data/tsp/tsp100_test_seed1234.pkl
-```
-To run baselines, you need to install [Compass](https://github.com/bcamath-ds/compass) by running the `install_compass.sh` script from within the `problems/op` directory and [Concorde](http://www.math.uwaterloo.ca/tsp/concorde.html) using the `install_concorde.sh` script from within `problems/tsp`. [LKH3](http://akira.ruc.dk/~keld/research/LKH-3/) should be automatically downloaded and installed when required. To use [Gurobi](http://www.gurobi.com), obtain a ([free academic](http://www.gurobi.com/registration/academic-license-reg)) license and follow the [installation instructions](https://www.gurobi.com/documentation/8.1/quickstart_windows/installing_the_anaconda_py.html).
-
-### Other options and help
-```bash
-python run.py -h
-python eval.py -h
-```
-
-### Example CVRP solution
-See `plot_vrp.ipynb` for an example of loading a pretrained model and plotting the result for Capacitated VRP with 100 nodes.
-
-![CVRP100](images/cvrp_0.png)
-
-## Acknowledgements
-Thanks to [pemami4911/neural-combinatorial-rl-pytorch](https://github.com/pemami4911/neural-combinatorial-rl-pytorch) for getting me started with the code for the Pointer Network.
-
-This repository includes adaptions of the following repositories as baselines:
-* https://github.com/MichelDeudon/encode-attend-navigate
-* https://github.com/mc-ride/orienteering
-* https://github.com/jordanamecler/PCTSP
-* https://github.com/rafael2reis/salesman

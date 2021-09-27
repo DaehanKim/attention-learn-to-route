@@ -11,6 +11,6 @@ for f in files:
     arr = np.load(f)
     new_fname = "../{}.pkl".format(f.split('.')[0])
     with open(new_fname,'wb') as f:
-        pickle.dump([arr.tolist()], f)
+        pickle.dump([arr.T.tolist()], f)
 
 

@@ -49,6 +49,7 @@ class AttentionModel(nn.Module):
                  n_encode_layers=2,
                  tanh_clipping=10.,
                  mask_inner=True,
+                 max_student=2000,
                  mask_logits=True,
                  normalization='batch',
                  n_heads=8,
@@ -62,6 +63,7 @@ class AttentionModel(nn.Module):
         self.n_encode_layers = n_encode_layers
         self.decode_type = None
         self.temp = 1.0
+        self.max_student=max_student
         self.allow_partial = problem.NAME == 'sdvrp'
         self.is_vrp = problem.NAME == 'cvrp' or problem.NAME == 'sdvrp'
         self.is_orienteering = problem.NAME == 'op'
@@ -107,7 +109,8 @@ class AttentionModel(nn.Module):
             n_heads=n_heads,
             embed_dim=embedding_dim,
             n_layers=self.n_encode_layers,
-            normalization=normalization
+            normalization=normalization,
+            student_num=max_student
         )
 
         # For each node we compute (glimpse key, glimpse value, logit key) so 3 * embedding_dim
@@ -355,6 +358,7 @@ class AttentionModel(nn.Module):
 
         # Compute the mask
         mask = state.get_mask()
+        if mask.size(-1) > self.max_student : mask = mask[:,:,:self.max_student]
 
         # Compute logits (unnormalized log_p)
         log_p, glimpse = self._one_to_many_logits(query, glimpse_K, glimpse_V, logit_K, mask)
